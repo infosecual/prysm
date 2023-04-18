@@ -3381,12 +3381,7 @@ def prysm_deps():
         sum = "h1:If5rVCMTp6W2SiRAQFlbpJNgVlgMEd+U2GZckwK38ic=",
         version = "v0.10.0",
     )
-    go_repository(
-        name = "com_github_protolambda_go_kzg",
-        importpath = "github.com/protolambda/go-kzg",
-        sum = "h1:DDaoou46n4krrbtDkymmqFAx2iqxatt2Sk+B1ZOM45A=",
-        version = "v0.0.0-20221129234330-612948a21fb0",
-    )
+
     go_repository(
         name = "com_github_protolambda_ztyp",
         importpath = "github.com/protolambda/ztyp",

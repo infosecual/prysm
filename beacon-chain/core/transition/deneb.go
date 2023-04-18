@@ -1,17 +1,25 @@
 package transition
 
 import (
-	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
 )
 
 const (
-	blobTxType                = 3
-	precompileInputLength     = 192
-	blobVersionedHashesOffset = 258 // position of blob_versioned_hashes offset in a serialized blob tx, see TxPeekBlobVersionedHashes
+	blobCommitmentVersionKZG  uint8 = 0x01
+	blobTxType                      = 3
+	precompileInputLength           = 192
+	blobVersionedHashesOffset       = 258 // position of blob_versioned_hashes offset in a serialized blob tx, see TxPeekBlobVersionedHashes
 )
+
+// kzgToVersionedHash implements kzg_to_versioned_hash from EIP-4844
+func kzgToVersionedHash(kzg []byte) (h [32]byte) {
+	h = sha256.Sum256(kzg)
+	h[0] = blobCommitmentVersionKZG
+	return
+}
 
 // verifyKZGCommitmentsAgainstTransactions implements verify_kzg_commitments_against_transactions
 // from the EIP-4844 consensus spec:
@@ -31,7 +39,8 @@ func verifyKZGCommitmentsAgainstTransactions(transactions, kzgCommitments [][]by
 		return fmt.Errorf("invalid number of blob versioned hashes: %v vs %v", len(kzgCommitments), len(versionedHashes))
 	}
 	for i := 0; i < len(kzgCommitments); i++ {
-		if !bytes.Equal(kzgCommitments[i], versionedHashes[i][:]) {
+		h := kzgToVersionedHash(kzgCommitments[i])
+		if h != versionedHashes[i] {
 			return errors.New("invalid version hashes vs kzg")
 		}
 	}

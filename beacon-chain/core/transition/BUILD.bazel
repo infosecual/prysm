@@ -3,6 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = [
+        "deneb.go",
         "log.go",
         "skip_slot_cache.go",
         "state.go",
@@ -45,7 +46,6 @@ go_library(
         "@com_github_pkg_errors//:go_default_library",
         "@com_github_prometheus_client_golang//prometheus:go_default_library",
         "@com_github_prometheus_client_golang//prometheus/promauto:go_default_library",
-        "@com_github_protolambda_go_kzg//eth:go_default_library",
         "@com_github_sirupsen_logrus//:go_default_library",
         "@io_opencensus_go//trace:go_default_library",
     ],
