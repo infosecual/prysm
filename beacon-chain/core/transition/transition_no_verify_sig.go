@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/protolambda/go-kzg/eth"
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/core/altair"
 	b "github.com/prysmaticlabs/prysm/v4/beacon-chain/core/blocks"
 	v "github.com/prysmaticlabs/prysm/v4/beacon-chain/core/validators"
@@ -14,7 +13,6 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/blocks"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/interfaces"
 	"github.com/prysmaticlabs/prysm/v4/crypto/bls"
-	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
 	"github.com/prysmaticlabs/prysm/v4/monitoring/tracing"
 	"github.com/prysmaticlabs/prysm/v4/runtime/version"
 
@@ -379,19 +377,15 @@ func ValidateBlobKzgs(ctx context.Context, body interfaces.ReadOnlyBeaconBlockBo
 	if err != nil {
 		return errors.Wrap(err, "could not get execution payload from block")
 	}
-	blkKzgs, err := body.BlobKzgCommitments()
+	kzgs, err := body.BlobKzgCommitments()
 	if err != nil {
 		return errors.Wrap(err, "could not get blob kzg commitments from block")
-	}
-	kzgs := make(eth.KZGCommitmentSequenceImpl, len(blkKzgs))
-	for i := range blkKzgs {
-		kzgs[i] = bytesutil.ToBytes48(blkKzgs[i])
 	}
 	txs, err := payload.Transactions()
 	if err != nil {
 		return errors.Wrap(err, "could not get transactions from payload")
 	}
-	return eth.VerifyKZGCommitmentsAgainstTransactions(txs, kzgs)
+	return verifyKZGCommitmentsAgainstTransactions(txs, kzgs)
 }
 
 // This calls altair block operations.
