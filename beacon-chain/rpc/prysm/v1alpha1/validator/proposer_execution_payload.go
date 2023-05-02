@@ -25,6 +25,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/runtime/version"
 	"github.com/prysmaticlabs/prysm/v4/time/slots"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 )
 
 var (
@@ -44,6 +45,9 @@ var (
 // The function has full awareness of pre and post merge.
 // The payload is computed given the respected time of merge.
 func (vs *Server) getExecutionPayload(ctx context.Context, slot primitives.Slot, vIdx primitives.ValidatorIndex, headRoot [32]byte, st state.BeaconState) (interfaces.ExecutionData, *enginev1.BlobsBundle, error) {
+	ctx, span := trace.StartSpan(ctx, "ProposerServer.getExecutionPayload")
+	defer span.End()
+
 	proposerID, payloadId, ok := vs.ProposerSlotIndexCache.GetProposerPayloadIDs(slot, headRoot)
 	feeRecipient := params.BeaconConfig().DefaultFeeRecipient
 	recipient, err := vs.BeaconDB.FeeRecipientByValidatorID(ctx, vIdx)
@@ -70,18 +74,11 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot primitives.Slot,
 		var pid [8]byte
 		copy(pid[:], payloadId[:])
 		payloadIDCacheHit.Inc()
-		payload, err := vs.ExecutionEngineCaller.GetPayload(ctx, pid, slot)
+		payload, blobsBundle, err := vs.ExecutionEngineCaller.GetPayload(ctx, pid, slot)
 		switch {
 		case err == nil:
 			warnIfFeeRecipientDiffers(payload, feeRecipient)
-			if slots.ToEpoch(slot) >= params.BeaconConfig().DenebForkEpoch {
-				sc, err := vs.ExecutionEngineCaller.GetBlobsBundle(ctx, pid)
-				if err != nil {
-					return nil, nil, errors.Wrap(err, "could not get blobs bundle from execution client")
-				}
-				return payload, sc, nil
-			}
-			return payload, nil, nil
+			return payload, blobsBundle, nil
 		case errors.Is(err, context.DeadlineExceeded):
 		default:
 			return nil, nil, errors.Wrap(err, "could not get cached payload from execution client")
@@ -137,11 +134,7 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot primitives.Slot,
 	// Blocks before Bellatrix don't have execution payloads. Use zeros as the hash.
 	if st.Version() >= version.Altair {
 		finalizedBlockHash = vs.FinalizationFetcher.FinalizedBlockHash()
-		justifiedBlockHash, err = vs.FinalizationFetcher.UnrealizedJustifiedPayloadBlockHash()
-		if err != nil {
-			log.WithError(err).Error("Could not get unrealized justified payload block hash")
-			justifiedBlockHash = finalizedBlockHash // Don't fail block proposal if we can't get the justified block hash.
-		}
+		justifiedBlockHash = vs.FinalizationFetcher.UnrealizedJustifiedPayloadBlockHash()
 	}
 
 	f := &enginev1.ForkchoiceState{
@@ -185,19 +178,12 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot primitives.Slot,
 	if payloadID == nil {
 		return nil, nil, fmt.Errorf("nil payload with block hash: %#x", parentHash)
 	}
-	payload, err := vs.ExecutionEngineCaller.GetPayload(ctx, *payloadID, slot)
+	payload, blobsBundle, err := vs.ExecutionEngineCaller.GetPayload(ctx, *payloadID, slot)
 	if err != nil {
 		return nil, nil, err
 	}
 	warnIfFeeRecipientDiffers(payload, feeRecipient)
-	if slots.ToEpoch(slot) >= params.BeaconConfig().DenebForkEpoch {
-		sc, err := vs.ExecutionEngineCaller.GetBlobsBundle(ctx, *payloadID)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "could not get blobs bundle from execution client")
-		}
-		return payload, sc, nil
-	}
-	return payload, nil, nil
+	return payload, blobsBundle, nil
 }
 
 // warnIfFeeRecipientDiffers logs a warning if the fee recipient in the included payload does not

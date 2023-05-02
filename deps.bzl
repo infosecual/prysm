@@ -340,6 +340,13 @@ def prysm_deps():
         version = "v0.1.0",
     )
     go_repository(
+        name = "com_github_bits_and_blooms_bitset",
+        importpath = "github.com/bits-and-blooms/bitset",
+        sum = "h1:NpE8frKRLGHIcEzkR+gZhiioW1+WbYV6fKwD6ZIpQT8=",
+        version = "v1.5.0",
+    )
+
+    go_repository(
         name = "com_github_bketelsen_crypt",
         importpath = "github.com/bketelsen/crypt",
         sum = "h1:w/jqZtC9YD4DS/Vp9GhWfWcCpuAL58oTnLoI8vE9YHU=",
@@ -675,7 +682,6 @@ def prysm_deps():
         sum = "h1:p1EgwI/C7NhT0JmVkwCD2ZBK8j4aeHQX2pMHHBfMQ6w=",
         version = "v2.0.2",
     )
-
     go_repository(
         name = "com_github_crate_crypto_go_ipa",
         importpath = "github.com/crate-crypto/go-ipa",
@@ -683,11 +689,12 @@ def prysm_deps():
         version = "v0.0.0-20220523130400-f11357ae11c7",
     )
     go_repository(
-        name = "com_github_crate_crypto_go_proto_danksharding_crypto",
-        importpath = "github.com/crate-crypto/go-proto-danksharding-crypto",
-        sum = "h1:o56BCoIbxTDYKYjZXnVRnVzRs7nnf/WLSghPJcNUDgo=",
-        version = "v0.0.0-20230314235044-15ed9c470195",
+        name = "com_github_crate_crypto_go_kzg_4844",
+        importpath = "github.com/crate-crypto/go-kzg-4844",
+        sum = "h1:2PXr2wKBNTmSsoYLCmaNg5Z6uQUf7LiUAsnDbTfq+0M=",
+        version = "v0.1.0",
     )
+
     go_repository(
         name = "com_github_creack_pty",
         importpath = "github.com/creack/pty",
@@ -988,8 +995,8 @@ def prysm_deps():
             "//third_party:com_github_ethereum_go_ethereum_secp256k1.patch",
         ],
         replace = "github.com/mdehoog/go-ethereum",
-        sum = "h1:Zxwp6I9DxV9fAtqJLC9No25Xh/SNQETeQ4DuclZZA94=",
-        version = "v1.10.19-0.20230322143632-22f9817975d2",
+        sum = "h1:o+C9qzIVKZE8a0+CQhgU0M/hfEaRd+uxqsrvEPLsl2g=",
+        version = "v1.10.19-0.20230424164545-6f54b68a31de",
     )
     go_repository(
         name = "com_github_evanphx_json_patch",

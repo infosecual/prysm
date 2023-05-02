@@ -2,11 +2,11 @@ package blocks
 
 import (
 	"fmt"
-	"math/big"
 
 	"github.com/pkg/errors"
 	ssz "github.com/prysmaticlabs/fastssz"
 	field_params "github.com/prysmaticlabs/prysm/v4/config/fieldparams"
+	consensus_types "github.com/prysmaticlabs/prysm/v4/consensus-types"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/interfaces"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	enginev1 "github.com/prysmaticlabs/prysm/v4/proto/engine/v1"
@@ -117,17 +117,27 @@ func (b *SignedBeaconBlock) PbGenericBlock() (*eth.GenericSignedBeaconBlock, err
 			Block: &eth.GenericSignedBeaconBlock_Capella{Capella: pb.(*eth.SignedBeaconBlockCapella)},
 		}, nil
 	case version.Deneb:
-		// TODO(TT): Add Deneb support.
+		if b.IsBlinded() {
+			return &eth.GenericSignedBeaconBlock{
+				Block: &eth.GenericSignedBeaconBlock_Blinded_Deneb{Blinded_Deneb: &eth.SignedBlindedBeaconBlockDenebAndBlobs{
+					Block: pb.(*eth.SignedBlindedBeaconBlockDeneb),
+				}},
+			}, nil
+		}
+		return &eth.GenericSignedBeaconBlock{
+			Block: &eth.GenericSignedBeaconBlock_Deneb{Deneb: &eth.SignedBeaconBlockDenebAndBlobs{
+				Block: pb.(*eth.SignedBeaconBlockDeneb),
+			}},
+		}, nil
 	default:
 		return nil, errIncorrectBlockVersion
 	}
-	return nil, errIncorrectBlockVersion
 }
 
 // PbPhase0Block returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbPhase0Block() (*eth.SignedBeaconBlock, error) {
 	if b.version != version.Phase0 {
-		return nil, ErrNotSupported("PbPhase0Block", b.version)
+		return nil, consensus_types.ErrNotSupported("PbPhase0Block", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -139,7 +149,7 @@ func (b *SignedBeaconBlock) PbPhase0Block() (*eth.SignedBeaconBlock, error) {
 // PbAltairBlock returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbAltairBlock() (*eth.SignedBeaconBlockAltair, error) {
 	if b.version != version.Altair {
-		return nil, ErrNotSupported("PbAltairBlock", b.version)
+		return nil, consensus_types.ErrNotSupported("PbAltairBlock", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -151,7 +161,7 @@ func (b *SignedBeaconBlock) PbAltairBlock() (*eth.SignedBeaconBlockAltair, error
 // PbBellatrixBlock returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbBellatrixBlock() (*eth.SignedBeaconBlockBellatrix, error) {
 	if b.version != version.Bellatrix || b.IsBlinded() {
-		return nil, ErrNotSupported("PbBellatrixBlock", b.version)
+		return nil, consensus_types.ErrNotSupported("PbBellatrixBlock", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -163,7 +173,7 @@ func (b *SignedBeaconBlock) PbBellatrixBlock() (*eth.SignedBeaconBlockBellatrix,
 // PbBlindedBellatrixBlock returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbBlindedBellatrixBlock() (*eth.SignedBlindedBeaconBlockBellatrix, error) {
 	if b.version != version.Bellatrix || !b.IsBlinded() {
-		return nil, ErrNotSupported("PbBlindedBellatrixBlock", b.version)
+		return nil, consensus_types.ErrNotSupported("PbBlindedBellatrixBlock", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -175,7 +185,7 @@ func (b *SignedBeaconBlock) PbBlindedBellatrixBlock() (*eth.SignedBlindedBeaconB
 // PbCapellaBlock returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbCapellaBlock() (*eth.SignedBeaconBlockCapella, error) {
 	if b.version != version.Capella || b.IsBlinded() {
-		return nil, ErrNotSupported("PbCapellaBlock", b.version)
+		return nil, consensus_types.ErrNotSupported("PbCapellaBlock", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -187,7 +197,7 @@ func (b *SignedBeaconBlock) PbCapellaBlock() (*eth.SignedBeaconBlockCapella, err
 // PbBlindedCapellaBlock returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbBlindedCapellaBlock() (*eth.SignedBlindedBeaconBlockCapella, error) {
 	if b.version != version.Capella || !b.IsBlinded() {
-		return nil, ErrNotSupported("PbBlindedCapellaBlock", b.version)
+		return nil, consensus_types.ErrNotSupported("PbBlindedCapellaBlock", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -199,7 +209,7 @@ func (b *SignedBeaconBlock) PbBlindedCapellaBlock() (*eth.SignedBlindedBeaconBlo
 // PbDenebBlock returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbDenebBlock() (*eth.SignedBeaconBlockDeneb, error) {
 	if b.version != version.Deneb || b.IsBlinded() {
-		return nil, ErrNotSupported("PbDenebBlock", b.version)
+		return nil, consensus_types.ErrNotSupported("PbDenebBlock", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -211,7 +221,7 @@ func (b *SignedBeaconBlock) PbDenebBlock() (*eth.SignedBeaconBlockDeneb, error) 
 // PbBlindedDenebBlock returns the underlying protobuf object.
 func (b *SignedBeaconBlock) PbBlindedDenebBlock() (*eth.SignedBlindedBeaconBlockDeneb, error) {
 	if b.version != version.Deneb || !b.IsBlinded() {
-		return nil, ErrNotSupported("PbBlindedDenebBlock", b.version)
+		return nil, consensus_types.ErrNotSupported("PbBlindedDenebBlock", b.version)
 	}
 	pb, err := b.Proto()
 	if err != nil {
@@ -973,7 +983,7 @@ func (b *BeaconBlockBody) VoluntaryExits() []*eth.SignedVoluntaryExit {
 // SyncAggregate returns the sync aggregate in the block.
 func (b *BeaconBlockBody) SyncAggregate() (*eth.SyncAggregate, error) {
 	if b.version == version.Phase0 {
-		return nil, ErrNotSupported("SyncAggregate", b.version)
+		return nil, consensus_types.ErrNotSupported("SyncAggregate", b.version)
 	}
 	return b.syncAggregate, nil
 }
@@ -982,7 +992,7 @@ func (b *BeaconBlockBody) SyncAggregate() (*eth.SyncAggregate, error) {
 func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 	switch b.version {
 	case version.Phase0, version.Altair:
-		return nil, ErrNotSupported("Execution", b.version)
+		return nil, consensus_types.ErrNotSupported("Execution", b.version)
 	case version.Bellatrix:
 		if b.isBlinded {
 			var ph *enginev1.ExecutionPayloadHeader
@@ -1013,7 +1023,7 @@ func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 				if !ok {
 					return nil, errPayloadHeaderWrongType
 				}
-				return WrappedExecutionPayloadHeaderCapella(ph, big.NewInt(0))
+				return WrappedExecutionPayloadHeaderCapella(ph, 0)
 			}
 		}
 		var p *enginev1.ExecutionPayloadCapella
@@ -1024,7 +1034,7 @@ func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 				return nil, errPayloadWrongType
 			}
 		}
-		return WrappedExecutionPayloadCapella(p, big.NewInt(0))
+		return WrappedExecutionPayloadCapella(p, 0)
 	case version.Deneb:
 		if b.isBlinded {
 			var ph *enginev1.ExecutionPayloadHeaderDeneb
@@ -1034,7 +1044,7 @@ func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 				if !ok {
 					return nil, errPayloadHeaderWrongType
 				}
-				return WrappedExecutionPayloadHeaderDeneb(ph, big.NewInt(0))
+				return WrappedExecutionPayloadHeaderDeneb(ph, 0)
 			}
 		}
 		var p *enginev1.ExecutionPayloadDeneb
@@ -1045,7 +1055,7 @@ func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 				return nil, errPayloadWrongType
 			}
 		}
-		return WrappedExecutionPayloadDeneb(p, big.NewInt(0))
+		return WrappedExecutionPayloadDeneb(p, 0)
 	default:
 		return nil, errIncorrectBlockVersion
 	}
@@ -1053,7 +1063,7 @@ func (b *BeaconBlockBody) Execution() (interfaces.ExecutionData, error) {
 
 func (b *BeaconBlockBody) BLSToExecutionChanges() ([]*eth.SignedBLSToExecutionChange, error) {
 	if b.version < version.Capella {
-		return nil, ErrNotSupported("BLSToExecutionChanges", b.version)
+		return nil, consensus_types.ErrNotSupported("BLSToExecutionChanges", b.version)
 	}
 	return b.blsToExecutionChanges, nil
 }
@@ -1062,7 +1072,7 @@ func (b *BeaconBlockBody) BLSToExecutionChanges() ([]*eth.SignedBLSToExecutionCh
 func (b *BeaconBlockBody) BlobKzgCommitments() ([][]byte, error) {
 	switch b.version {
 	case version.Phase0, version.Altair, version.Bellatrix, version.Capella:
-		return nil, ErrNotSupported("BlobKzgCommitments", b.version)
+		return nil, consensus_types.ErrNotSupported("BlobKzgCommitments", b.version)
 	case version.Deneb:
 		return b.blobKzgCommitments, nil
 	default:

@@ -91,7 +91,7 @@ require (
 	gopkg.in/d4l3k/messagediff.v1 v1.2.1
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/client-go v0.18.3
+	k8s.io/client-go v0.20.0
 )
 
 require (
@@ -156,7 +156,6 @@ require (
 	github.com/jbenet/go-temp-err-catcher v0.1.0 // indirect
 	github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a // indirect
 	github.com/karalabe/usb v0.0.2 // indirect
-	github.com/kilic/bls12-381 v0.1.1-0.20220929213557-ca162e8a70f4 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.1 // indirect
 	github.com/koron/go-ssdp v0.0.3 // indirect
@@ -240,12 +239,11 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
-	k8s.io/apimachinery v0.18.3 // indirect
-	k8s.io/klog v1.0.0 // indirect
+	k8s.io/apimachinery v0.20.0 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
-	sigs.k8s.io/structured-merge-diff/v3 v3.0.0 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.0.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
@@ -262,13 +260,13 @@ require (
 	google.golang.org/api v0.44.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	k8s.io/klog/v2 v2.80.0 // indirect
-	k8s.io/utils v0.0.0-20200520001619-278ece378a50 // indirect
+	k8s.io/utils v0.0.0-20201110183641-67b214c5f920 // indirect
 )
 
 replace github.com/json-iterator/go => github.com/prestonvanloon/go v1.1.7-0.20190722034630-4f2e55fcf87b
 
 // See https://github.com/prysmaticlabs/grpc-gateway/issues/2
 
-replace github.com/ethereum/go-ethereum => github.com/mdehoog/go-ethereum v1.10.19-0.20230322143632-22f9817975d2
+replace github.com/ethereum/go-ethereum => github.com/mdehoog/go-ethereum v1.10.19-0.20230424164545-6f54b68a31de
 
 replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/grpc-gateway/v2 v2.3.1-0.20230315201114-09284ba20446
