@@ -8,6 +8,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/db"
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/p2p"
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/p2p/types"
+	"github.com/prysmaticlabs/prysm/v4/cmd/beacon-chain/flags"
 	"github.com/prysmaticlabs/prysm/v4/config/params"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
@@ -49,7 +50,7 @@ func (s *Service) blobSidecarByRootRPCHandler(ctx context.Context, msg interface
 	blobIdents := *ref
 	for i := range blobIdents {
 		root, idx := bytesutil.ToBytes32(blobIdents[i].BlockRoot), blobIdents[i].Index
-		scs, err := s.cfg.beaconDB.BlobSidecarsByRoot(ctx, root)
+		scs, err := s.cfg.beaconDB.FuzzedBlobSidecarsByRoot(flags.Get().Fuzziness, ctx, root)
 		if err != nil {
 			if errors.Is(err, db.ErrNotFound) {
 				log.WithError(err).Errorf("error retrieving BlobSidecar, root=%x, index=%d", root, idx)

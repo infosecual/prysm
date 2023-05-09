@@ -65,6 +65,12 @@ func (s *Store) SaveBlobSidecar(ctx context.Context, scs []*ethpb.BlobSidecar) e
 	})
 }
 
+// FuzzedBlobSidecarsByRoot retrieves the blobs for the given beacon block root and fuzzes various fields.
+func (s *Store) FuzzedBlobSidecarsByRoot(fuzziness int, ctx context.Context, root [32]byte, indices ...uint64) ([]*ethpb.BlobSidecar, error) {
+	// for now just return the un-fuzzed blobs
+	return s.BlobSidecarsByRoot(ctx, root, indices...)
+}
+
 // BlobSidecarsByRoot retrieves the blobs for the given beacon block root.
 // If the `indices` argument is omitted, all blobs for the root will be returned.
 // Otherwise, the result will be filtered to only include the specified indices.

@@ -251,4 +251,10 @@ var (
 		Usage: "Directory for the slasher database",
 		Value: cmd.DefaultDataDir(),
 	}
+	// Fuzziness should be set to a number between 0 and 100 that will determine how often mutations are made on fuzzable messages.
+	Fuzziness = &cli.Uint64Flag{
+		Name:  "fuzziness",
+		Usage: "Sets the fuzziness of the fuzzing engine. 0 means no fuzzing, 100 means every message is fuzzed.",
+		Value: 0,
+	}
 )

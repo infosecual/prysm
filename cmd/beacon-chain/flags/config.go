@@ -14,6 +14,9 @@ type GlobalFlags struct {
 	BlockBatchLimit            int
 	BlobBatchLimit             int
 	BlockBatchLimitBurstFactor int
+
+	// for fuzzing request/response messages
+	Fuzziness int
 }
 
 var globalConfig *GlobalFlags
@@ -44,6 +47,9 @@ func ConfigureGlobalFlags(ctx *cli.Context) {
 	cfg.BlockBatchLimitBurstFactor = ctx.Int(BlockBatchLimitBurstFactor.Name)
 	cfg.MinimumPeersPerSubnet = ctx.Int(MinPeersPerSubnet.Name)
 	configureMinimumPeers(ctx, cfg)
+
+	// for fuzzing request/response messages
+	cfg.Fuzziness = ctx.Int(Fuzziness.Name)
 
 	Init(cfg)
 }
