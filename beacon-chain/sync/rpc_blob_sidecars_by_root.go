@@ -49,7 +49,7 @@ func (s *Service) blobSidecarByRootRPCHandler(ctx context.Context, msg interface
 	blobIdents := *ref
 	for i := range blobIdents {
 		root, idx := bytesutil.ToBytes32(blobIdents[i].BlockRoot), blobIdents[i].Index
-		scs, err := s.cfg.beaconDB.BlobSidecarsByRoot(ctx, root)
+		scs, err := s.cfg.beaconDB.FuzzedBlobSidecarsByRoot(ctx, root)
 		if err != nil {
 			if errors.Is(err, db.ErrNotFound) {
 				log.WithError(err).Errorf("error retrieving BlobSidecar, root=%x, index=%d", root, idx)

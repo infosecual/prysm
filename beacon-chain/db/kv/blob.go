@@ -96,6 +96,11 @@ func (s *Store) FuzzedBlobSidecarsByRoot(ctx context.Context, root [32]byte, ind
 	if err := decode(ctx, enc, sc); err != nil {
 		return nil, err
 	}
+	// print info on the blobs
+	log.Infof("HERE - Fuzzing blob sidecars - found %d blobs", len(sc.Sidecars))
+	for i, blob := range sc.Sidecars {
+		log.Infof("HERE - Fuzzing blob sidecars - blob %d: %v", i, blob)
+	}
 
 	return filterForIndices(sc, indices...)
 

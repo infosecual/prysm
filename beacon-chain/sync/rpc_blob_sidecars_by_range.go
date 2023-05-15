@@ -26,7 +26,7 @@ func (s *Service) streamBlobBatch(ctx context.Context, batch blockBatch, stream 
 	var writes uint64
 	for _, b := range batch.Sequence() {
 		root := b.Root()
-		scs, err := s.cfg.beaconDB.BlobSidecarsByRoot(ctx, b.Root())
+		scs, err := s.cfg.beaconDB.FuzzedBlobSidecarsByRoot(ctx, b.Root())
 		if errors.Is(err, db.ErrNotFound) {
 			continue
 		}

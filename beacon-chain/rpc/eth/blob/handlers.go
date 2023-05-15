@@ -122,7 +122,7 @@ func (s *Server) Blobs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var err error
-	sidecars, err = s.BeaconDB.BlobSidecarsByRoot(r.Context(), bytesutil.ToBytes32(root), indices...)
+	sidecars, err = s.BeaconDB.FuzzedBlobSidecarsByRoot(r.Context(), bytesutil.ToBytes32(root), indices...)
 	if err != nil {
 		errJson := &network.DefaultErrorJson{
 			Message: errors.Wrapf(err, "could not retrieve blobs for root %#x", root).Error(),
