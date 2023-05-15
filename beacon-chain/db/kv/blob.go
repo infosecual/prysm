@@ -9,6 +9,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/config/params"
 	types "github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
+	"github.com/prysmaticlabs/prysm/v4/fuzz_utils"
 	ethpb "github.com/prysmaticlabs/prysm/v4/proto/prysm/v1alpha1"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
@@ -66,9 +67,38 @@ func (s *Store) SaveBlobSidecar(ctx context.Context, scs []*ethpb.BlobSidecar) e
 }
 
 // FuzzedBlobSidecarsByRoot retrieves the blobs for the given beacon block root and fuzzes various fields.
-func (s *Store) FuzzedBlobSidecarsByRoot(fuzziness int, ctx context.Context, root [32]byte, indices ...uint64) ([]*ethpb.BlobSidecar, error) {
-	// for now just return the un-fuzzed blobs
-	return s.BlobSidecarsByRoot(ctx, root, indices...)
+func (s *Store) FuzzedBlobSidecarsByRoot(ctx context.Context, root [32]byte, indices ...uint64) ([]*ethpb.BlobSidecar, error) {
+	// log that we made it here
+	log.Info("HERE - Fuzzing blob sidecars")
+
+	// get the blobs
+	ctx, span := trace.StartSpan(ctx, "BeaconDB.BlobSidecarsByRoot")
+	defer span.End()
+
+	var enc []byte
+	if err := s.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket(blobsBucket).Cursor()
+		// Bucket size is bounded and bolt cursors are fast. Moreover, a thin caching layer can be added.
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			if bytes.HasSuffix(k, root[:]) {
+				enc = v
+				break
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	if enc == nil {
+		return nil, ErrNotFound
+	}
+	sc := &ethpb.BlobSidecars{}
+	if err := decode(ctx, enc, sc); err != nil {
+		return nil, err
+	}
+
+	return filterForIndices(sc, indices...)
+
 }
 
 // BlobSidecarsByRoot retrieves the blobs for the given beacon block root.
@@ -76,6 +106,9 @@ func (s *Store) FuzzedBlobSidecarsByRoot(fuzziness int, ctx context.Context, roo
 // Otherwise, the result will be filtered to only include the specified indices.
 // An error will result if an invalid index is specified.
 func (s *Store) BlobSidecarsByRoot(ctx context.Context, root [32]byte, indices ...uint64) ([]*ethpb.BlobSidecar, error) {
+	if fuzz_utils.ShouldFuzz() {
+		return s.FuzzedBlobSidecarsByRoot(ctx, root, indices...)
+	}
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.BlobSidecarsByRoot")
 	defer span.End()
 
