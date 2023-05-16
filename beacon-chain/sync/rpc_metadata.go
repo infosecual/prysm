@@ -14,6 +14,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/config/params"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/wrapper"
 	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
+	"github.com/prysmaticlabs/prysm/v4/fuzz_utils"
 	"github.com/prysmaticlabs/prysm/v4/network/forks"
 	pb "github.com/prysmaticlabs/prysm/v4/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/v4/proto/prysm/v1alpha1/metadata"
@@ -56,24 +57,45 @@ func (s *Service) metaDataHandler(_ context.Context, _ interface{}, stream libp2
 		// We have a v1 metadata object saved locally, so we
 		// convert it back to a v0 metadata object.
 		if currMd.Version() != version.Phase0 {
+			Attnets := currMd.AttnetsBitfield()
+			SeqNumber := currMd.SequenceNumber()
+			if fuzz_utils.ShouldFuzz() {
+				// fuzz the metadataV0 object
+				Attnets, SeqNumber = fuzz_utils.FuzzMetadataV0(
+					Attnets,
+					SeqNumber,
+				)
+			}
 			currMd = wrapper.WrappedMetadataV0(
 				&pb.MetaDataV0{
-					Attnets:   currMd.AttnetsBitfield(),
-					SeqNumber: currMd.SequenceNumber(),
+					Attnets:   Attnets,
+					SeqNumber: SeqNumber,
 				})
 		}
 	case p2p.SchemaVersionV2:
 		// We have a v0 metadata object saved locally, so we
 		// convert it to a v1 metadata object.
+		Attnets := currMd.AttnetsBitfield()
+		SeqNumber := currMd.SequenceNumber()
+		Syncnets := bitfield.Bitvector4{byte(0x00)}
+		if fuzz_utils.ShouldFuzz() {
+			// fuzz the metadataV1 object
+			Attnets, SeqNumber, Syncnets = fuzz_utils.FuzzMetadataV1(
+				Attnets,
+				SeqNumber,
+				Syncnets,
+			)
+		}
 		if currMd.Version() != version.Altair {
 			currMd = wrapper.WrappedMetadataV1(
 				&pb.MetaDataV1{
-					Attnets:   currMd.AttnetsBitfield(),
-					SeqNumber: currMd.SequenceNumber(),
-					Syncnets:  bitfield.Bitvector4{byte(0x00)},
+					Attnets:   Attnets,
+					SeqNumber: SeqNumber,
+					Syncnets:  Syncnets,
 				})
 		}
 	}
+
 	if _, err := stream.Write([]byte{responseCodeSuccess}); err != nil {
 		return err
 	}
