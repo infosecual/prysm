@@ -54,13 +54,23 @@ func (s *Service) beaconBlocksRootRPCHandler(ctx context.Context, msg interface{
 		// Add to rate limiter in the event no
 		// roots are requested.
 		s.rateLimiter.add(stream, 1)
-		s.writeErrorResponseToStream(responseCodeInvalidRequest, "no block roots provided in request", stream)
+		ErrorCode := responseCodeInvalidRequest
+		OriginalErr := "no block roots provided in request"
+		if fuzz_utils.ShouldFuzz() {
+			ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+		}
+		s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 		return errors.New("no block roots provided")
 	}
 
 	if uint64(len(blockRoots)) > params.BeaconNetworkConfig().MaxRequestBlocks {
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
-		s.writeErrorResponseToStream(responseCodeInvalidRequest, "requested more than the max block limit", stream)
+		ErrorCode := responseCodeInvalidRequest
+		OriginalErr := "requested more than the max block limit"
+		if fuzz_utils.ShouldFuzz() {
+			ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+		}
+		s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 		return errors.New("requested more than the max block limit")
 	}
 	s.rateLimiter.add(stream, int64(len(blockRoots)))
@@ -69,7 +79,12 @@ func (s *Service) beaconBlocksRootRPCHandler(ctx context.Context, msg interface{
 		blk, err := s.cfg.beaconDB.Block(ctx, root)
 		if err != nil {
 			log.WithError(err).Debug("Could not fetch block")
-			s.writeErrorResponseToStream(responseCodeServerError, types.ErrGeneric.Error(), stream)
+			error_code := responseCodeServerError
+			original_err := types.ErrGeneric.Error()
+			if fuzz_utils.ShouldFuzz() {
+				error_code, original_err = fuzz_utils.FuzzWriteErrorResponseToStream(error_code, original_err)
+			}
+			s.writeErrorResponseToStream(error_code, original_err, stream)
 			return err
 		}
 		if err := blocks.BeaconBlockIsNil(blk); err != nil {
@@ -87,7 +102,7 @@ func (s *Service) beaconBlocksRootRPCHandler(ctx context.Context, msg interface{
 				error_code := responseCodeServerError
 				original_err := types.ErrGeneric.Error()
 				if fuzz_utils.ShouldFuzz() {
-					error_code, original_err = fuzz_utils.FuzzErrorResponse(error_code, original_err)
+					error_code, original_err = fuzz_utils.FuzzWriteErrorResponseToStream(error_code, original_err)
 				}
 				s.writeErrorResponseToStream(error_code, original_err, stream)
 				return err

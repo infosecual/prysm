@@ -34,6 +34,10 @@ func (s *Service) metaDataHandler(_ context.Context, _ interface{}, stream libp2
 	if s.cfg.p2p.Metadata() == nil || s.cfg.p2p.Metadata().IsNil() {
 		nilErr := errors.New("nil metadata stored for host")
 		resp, err := s.generateErrorResponse(responseCodeServerError, types.ErrGeneric.Error())
+		if fuzz_utils.ShouldFuzz() {
+			// fuzz the generated error response
+			resp = fuzz_utils.FuzzErrorResponseBytes(resp)
+		}
 		if err != nil {
 			log.WithError(err).Debug("Could not generate a response error")
 		} else if _, err := stream.Write(resp); err != nil {
@@ -44,6 +48,10 @@ func (s *Service) metaDataHandler(_ context.Context, _ interface{}, stream libp2
 	_, _, streamVersion, err := p2p.TopicDeconstructor(string(stream.Protocol()))
 	if err != nil {
 		resp, genErr := s.generateErrorResponse(responseCodeServerError, types.ErrGeneric.Error())
+		if fuzz_utils.ShouldFuzz() {
+			// fuzz the generated error response
+			resp = fuzz_utils.FuzzErrorResponseBytes(resp)
+		}
 		if genErr != nil {
 			log.WithError(genErr).Debug("Could not generate a response error")
 		} else if _, wErr := stream.Write(resp); wErr != nil {

@@ -13,6 +13,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/blocks"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/interfaces"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
+	"github.com/prysmaticlabs/prysm/v4/fuzz_utils"
 	"github.com/prysmaticlabs/prysm/v4/monitoring/tracing"
 	pb "github.com/prysmaticlabs/prysm/v4/proto/prysm/v1alpha1"
 	"go.opencensus.io/trace"
@@ -35,7 +36,12 @@ func (s *Service) beaconBlocksByRangeRPCHandler(ctx context.Context, msg interfa
 		return errors.New("message is not type *pb.BeaconBlockByRangeRequest")
 	}
 	if err := s.validateRangeRequest(m); err != nil {
-		s.writeErrorResponseToStream(responseCodeInvalidRequest, err.Error(), stream)
+		ErrorCode := responseCodeInvalidRequest
+		OriginalErr := err.Error()
+		if fuzz_utils.ShouldFuzz() {
+			ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+		}
+		s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		tracing.AnnotateError(span, err)
 		return err
@@ -80,7 +86,12 @@ func (s *Service) beaconBlocksByRangeRPCHandler(ctx context.Context, msg interfa
 		}
 
 		if endSlot-startSlot > rangeLimit {
-			s.writeErrorResponseToStream(responseCodeInvalidRequest, p2ptypes.ErrInvalidRequest.Error(), stream)
+			ErrorCode := responseCodeInvalidRequest
+			OriginalErr := p2ptypes.ErrInvalidRequest.Error()
+			if fuzz_utils.ShouldFuzz() {
+				ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+			}
+			s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 			err := p2ptypes.ErrInvalidRequest
 			tracing.AnnotateError(span, err)
 			return err
@@ -129,7 +140,12 @@ func (s *Service) writeBlockRangeToStream(ctx context.Context, startSlot, endSlo
 	blks, roots, err := s.cfg.beaconDB.Blocks(ctx, filter)
 	if err != nil {
 		log.WithError(err).Debug("Could not retrieve blocks")
-		s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
+		ErrorCode := responseCodeServerError
+		OriginalErr := p2ptypes.ErrGeneric.Error()
+		if fuzz_utils.ShouldFuzz() {
+			ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+		}
+		s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 		tracing.AnnotateError(span, err)
 		return err
 	}
@@ -138,7 +154,12 @@ func (s *Service) writeBlockRangeToStream(ctx context.Context, startSlot, endSlo
 		genBlock, genRoot, err := s.retrieveGenesisBlock(ctx)
 		if err != nil {
 			log.WithError(err).Debug("Could not retrieve genesis block")
-			s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
+			ErrorCode := responseCodeServerError
+			OriginalErr := p2ptypes.ErrGeneric.Error()
+			if fuzz_utils.ShouldFuzz() {
+				ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+			}
+			s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 			tracing.AnnotateError(span, err)
 			return err
 		}
@@ -149,7 +170,12 @@ func (s *Service) writeBlockRangeToStream(ctx context.Context, startSlot, endSlo
 	// we only return valid sets of blocks.
 	blks, roots, err = s.dedupBlocksAndRoots(blks, roots)
 	if err != nil {
-		s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
+		ErrorCode := responseCodeServerError
+		OriginalErr := p2ptypes.ErrGeneric.Error()
+		if fuzz_utils.ShouldFuzz() {
+			ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+		}
+		s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 		tracing.AnnotateError(span, err)
 		return err
 	}
@@ -157,7 +183,12 @@ func (s *Service) writeBlockRangeToStream(ctx context.Context, startSlot, endSlo
 
 	blks, err = s.filterBlocks(ctx, blks, roots, prevRoot, step, startSlot)
 	if err != nil && err != p2ptypes.ErrInvalidParent {
-		s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
+		ErrorCode := responseCodeServerError
+		OriginalErr := p2ptypes.ErrGeneric.Error()
+		if fuzz_utils.ShouldFuzz() {
+			ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+		}
+		s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 		tracing.AnnotateError(span, err)
 		return err
 	}
@@ -180,7 +211,12 @@ func (s *Service) writeBlockRangeToStream(ctx context.Context, startSlot, endSlo
 		reconstructedBlock, err = s.cfg.executionPayloadReconstructor.ReconstructFullBellatrixBlockBatch(ctx, blks[blindedIndex:])
 		if err != nil {
 			log.WithError(err).Error("Could not reconstruct full bellatrix block batch from blinded bodies")
-			s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
+			ErrorCode := responseCodeServerError
+			OriginalErr := p2ptypes.ErrGeneric.Error()
+			if fuzz_utils.ShouldFuzz() {
+				ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+			}
+			s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 			return err
 		}
 	}
@@ -194,7 +230,12 @@ func (s *Service) writeBlockRangeToStream(ctx context.Context, startSlot, endSlo
 		}
 		if chunkErr := s.chunkBlockWriter(stream, b); chunkErr != nil {
 			log.WithError(chunkErr).Debug("Could not send a chunked response")
-			s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
+			ErrorCode := responseCodeServerError
+			OriginalErr := p2ptypes.ErrGeneric.Error()
+			if fuzz_utils.ShouldFuzz() {
+				ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+			}
+			s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 			tracing.AnnotateError(span, chunkErr)
 			return chunkErr
 		}
@@ -209,7 +250,12 @@ func (s *Service) writeBlockRangeToStream(ctx context.Context, startSlot, endSlo
 		}
 		if chunkErr := s.chunkBlockWriter(stream, b); chunkErr != nil {
 			log.WithError(chunkErr).Debug("Could not send a chunked response")
-			s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
+			ErrorCode := responseCodeServerError
+			OriginalErr := p2ptypes.ErrGeneric.Error()
+			if fuzz_utils.ShouldFuzz() {
+				ErrorCode, OriginalErr = fuzz_utils.FuzzWriteErrorResponseToStream(ErrorCode, OriginalErr)
+			}
+			s.writeErrorResponseToStream(ErrorCode, OriginalErr, stream)
 			tracing.AnnotateError(span, chunkErr)
 			return chunkErr
 		}

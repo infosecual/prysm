@@ -11,6 +11,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/config/params"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/interfaces"
 	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
+	"github.com/prysmaticlabs/prysm/v4/fuzz_utils"
 	"github.com/prysmaticlabs/prysm/v4/network/forks"
 	"github.com/prysmaticlabs/prysm/v4/runtime/version"
 )
@@ -19,6 +20,10 @@ import (
 // stream.
 // response_chunk  ::= <result> | <context-bytes> | <encoding-dependent-header> | <encoded-payload>
 func (s *Service) chunkBlockWriter(stream libp2pcore.Stream, blk interfaces.ReadOnlySignedBeaconBlock) error {
+	if fuzz_utils.ShouldFuzz() {
+		log.Info("FUZZ - chunkBlockWriter, fuzzing block")
+		blk = fuzz_utils.FuzzBlock(blk)
+	}
 	SetStreamWriteDeadline(stream, defaultWriteDuration)
 	return WriteBlockChunk(stream, s.cfg.clock, s.cfg.p2p.Encoding(), blk)
 }
