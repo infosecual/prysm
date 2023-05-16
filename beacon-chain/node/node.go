@@ -57,6 +57,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v4/container/slice"
 	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
+	"github.com/prysmaticlabs/prysm/v4/fuzz_utils"
 	"github.com/prysmaticlabs/prysm/v4/monitoring/prometheus"
 	"github.com/prysmaticlabs/prysm/v4/runtime"
 	"github.com/prysmaticlabs/prysm/v4/runtime/debug"
@@ -152,6 +153,9 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 	if err := configureExecutionSetting(cliCtx); err != nil {
 		return nil, err
 	}
+	// configure fuzziness for the beacon node
+	fuzz_utils.SetFuzziness(cliCtx)
+
 	configureFastSSZHashingAlgorithm()
 
 	// Initializes any forks here.
