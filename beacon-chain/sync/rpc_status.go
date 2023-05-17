@@ -19,6 +19,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/config/params"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
+	"github.com/prysmaticlabs/prysm/v4/fuzz_utils"
 	pb "github.com/prysmaticlabs/prysm/v4/proto/prysm/v1alpha1"
 	prysmTime "github.com/prysmaticlabs/prysm/v4/time"
 	"github.com/prysmaticlabs/prysm/v4/time/slots"
@@ -265,17 +266,29 @@ func (s *Service) respondWithStatus(ctx context.Context, stream network.Stream) 
 		return err
 	}
 	cp := s.cfg.chain.FinalizedCheckpt()
+
+	ForkDigest := forkDigest[:]
+	FinalizedRoot := cp.Root
+	FinalizedEpoch := cp.Epoch
+	HeadRoot := headRoot
+	HeadSlot := s.cfg.chain.HeadSlot()
+
+	if fuzz_utils.ShouldFuzz() {
+		fuzz_utils.FuzzStatusResponse(&ForkDigest, &FinalizedRoot, &FinalizedEpoch, &HeadRoot, &HeadSlot)
+	}
+
 	resp := &pb.Status{
-		ForkDigest:     forkDigest[:],
-		FinalizedRoot:  cp.Root,
-		FinalizedEpoch: cp.Epoch,
-		HeadRoot:       headRoot,
-		HeadSlot:       s.cfg.chain.HeadSlot(),
+		ForkDigest:     ForkDigest,
+		FinalizedRoot:  FinalizedRoot,
+		FinalizedEpoch: FinalizedEpoch,
+		HeadRoot:       HeadRoot,
+		HeadSlot:       HeadSlot,
 	}
 
 	if _, err := stream.Write([]byte{responseCodeSuccess}); err != nil {
 		log.WithError(err).Debug("Could not write to stream")
 	}
+
 	_, err = s.cfg.p2p.Encoding().EncodeWithMaxLength(stream, resp)
 	return err
 }
