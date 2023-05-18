@@ -11,6 +11,7 @@ import (
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/p2p"
 	p2ptypes "github.com/prysmaticlabs/prysm/v4/beacon-chain/p2p/types"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
+	"github.com/prysmaticlabs/prysm/v4/fuzz_utils"
 	"github.com/prysmaticlabs/prysm/v4/time"
 	"github.com/prysmaticlabs/prysm/v4/time/slots"
 )
@@ -36,7 +37,11 @@ func (s *Service) pingHandler(_ context.Context, msg interface{}, stream libp2pc
 		}
 		return err
 	}
-	if _, err := stream.Write([]byte{responseCodeSuccess}); err != nil {
+	responseCode := responseCodeSuccess
+	if fuzz_utils.ShouldFuzz() {
+		fuzz_utils.FuzzRespCode(&responseCode)
+	}
+	if _, err := stream.Write([]byte{responseCode}); err != nil {
 		return err
 	}
 	sq := primitives.SSZUint64(s.cfg.p2p.MetadataSeq())

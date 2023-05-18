@@ -234,6 +234,10 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 
 		originalErr := err
 		resp, err := s.generateErrorResponse(respCode, err.Error())
+		if fuzz_utils.ShouldFuzz() {
+			// fuzz the generated error response
+			resp = fuzz_utils.FuzzErrorResponseBytes(resp)
+		}
 		if err != nil {
 			log.WithError(err).Debug("Could not generate a response error")
 		} else if _, err := stream.Write(resp); err != nil {
