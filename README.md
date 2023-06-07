@@ -1,5 +1,6 @@
 # Wormtongue
-An evil Prysm node for fuzzzing the ethereum CL request/response message domain
+An evil Prysm node for fuzzzing the ethereum CL request/response message domain. Named after ![Grima Wormtongue](https://en.wikipedia.org/wiki/Gr%C3%ADma_Wormtongue#/media/File:Grima_and_Th%C3%A9oden.jpg)
+
 ## Getting Started
 ### Testing code modifications
 Wormtongue is designed to be tested in local testnets via [Ethereum Testnet Bootstrapper](https://github.com/0xTylerHolmes/ethereum-testnet-bootstrapper/) (ETB) which builds wormtongue in docker. If you want to test that modifications build correctly you can do so locally on linux eg.:
@@ -7,7 +8,6 @@ Wormtongue is designed to be tested in local testnets via [Ethereum Testnet Boot
 ```
 mkdir builds
 go build -o builds ./...
-
 ```
 ### Setting up ETB
 You will need two repos to run Wormtongue in ETB, the main ETB repo and the wormtongue config/docker repo. Here is an example workflow of getting a Wormtongue fuzzer going:
