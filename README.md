@@ -40,6 +40,7 @@ make clean config=configs/mainnet-current-wormtongue.yaml
 make init-testnet config=configs/mainnet-current-wormtongue.yaml
 ```
 
+A small script to do all of this can be found in this directory: `setup_wormtongue_etb.sh`
 
 ### Running ETB
 
