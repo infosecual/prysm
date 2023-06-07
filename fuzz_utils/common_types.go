@@ -12,7 +12,7 @@ var responseCodeResourceUnavailable = byte(0x03)
 
 func FuzzRespCode(code *byte) {
 	log.Info("FUZZ - FuzzRespCode before mutation: ", *code)
-	number := rand.Intn(4)
+	number := rand.Intn(5)
 	switch number {
 	case 0:
 		*code = responseCodeSuccess
@@ -22,7 +22,17 @@ func FuzzRespCode(code *byte) {
 		*code = responseCodeServerError
 	case 3:
 		*code = responseCodeResourceUnavailable
+	case 4:
+		// The range [4, 127] is RESERVED for future usages, and should be treated as error if not recognized expressly.
+		futureRespCodes := rand.Intn(127-4+1) + 4
+		// Clients MAY use response codes above 128 to indicate alternative, erroneous request-specific responses.
+		clientRespCodes := rand.Intn(255-128+1) + 128
+		chooseOneOfTwo := rand.Intn(2) == 0
+		if chooseOneOfTwo {
+			*code = byte(futureRespCodes)
+		} else {
+			*code = byte(clientRespCodes)
+		}
 	}
 	log.Info("FUZZ - FuzzRespCode after mutation: ", *code)
-	return
 }
