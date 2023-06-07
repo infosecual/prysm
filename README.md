@@ -1,5 +1,5 @@
 # Wormtongue
-An evil Prysm node for fuzzzing the ethereum CL request/response message domain. Named after ![Grima Wormtongue](https://en.wikipedia.org/wiki/Gr%C3%ADma_Wormtongue#/media/File:Grima_and_Th%C3%A9oden.jpg)
+An evil Prysm node for fuzzzing the ethereum CL request/response message domain. Named after [Grima Wormtongue](https://en.wikipedia.org/wiki/Gr%C3%ADma_Wormtongue)
 
 ## Getting Started
 ### Testing code modifications
