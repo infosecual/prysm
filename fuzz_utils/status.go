@@ -31,18 +31,25 @@ func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoc
 		MutateNBytes(forkDigest, 4)
 	}
 	if rand.Intn(100) < 20 {
+		// TODO: put valid root minus 1
 		log.Info("Mutating finalizedRoot")
 		MutateNBytes(finalizedRoot, 32)
 	}
 	if rand.Intn(100) < 20 {
+		// TODO: put valid root minus 1
+
 		log.Info("Mutating finalizedEpoch")
 		*finalizedEpoch = primitives.Epoch(RandUint64())
 	}
 	if rand.Intn(100) < 20 {
+		// TODO: put valid root minus 1
+
 		log.Info("Mutating headRoot")
 		MutateNBytes(headRoot, 32)
 	}
 	if rand.Intn(100) < 20 {
+		// TODO: put valid root minus 1
+
 		log.Info("Mutating HeadSlot")
 		*HeadSlot = primitives.Slot(RandUint64())
 	}
