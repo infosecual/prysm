@@ -24,7 +24,8 @@ git clone git@github.com:infosecual/etb-fuzzer-images.git
 
 Build the Wormtongue image
 ```
-docker build -t etb-all-clients:latest -f etb-fuzzer-images/wormtongue/deps/dockers/etb-all-clients_mainnet-wormtongue.Dockerfile .
+docker build -t etb-all-clients:latest -f etb-fuzzer-images/wormtongue/deps/dockers/etb-all-clients_generic_no-peer-scoring .
+docker build -t etb-wormtongue:latest -f etb-fuzzer-images/wormtongue/deps/dockers/wormtongue.Dockerfile .
 ```
 
 Move the configs and the launchers into ethereum-testnet-bootstrapper
