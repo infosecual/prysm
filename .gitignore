@@ -1,3 +1,7 @@
+# ETB directories
+etb-fuzzer-images/
+ethereum-testnet-bootstrapper/
+
 # Ignore bazel directories
 bazel-*
 
