@@ -3,9 +3,11 @@ package fuzz_utils
 import (
 	"math/rand"
 
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.WithField("prefix", "fuzz_utils")
 
 // /////////////////////////////////////////////////////////////////////////////
 // status fuzzers

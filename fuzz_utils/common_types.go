@@ -2,8 +2,6 @@ package fuzz_utils
 
 import (
 	"math/rand"
-
-	"github.com/ethereum/go-ethereum/log"
 )
 
 // https://github.com/ethereum/consensus-specs/blob/dev/specs/phase0/p2p-interface.md#responding-side

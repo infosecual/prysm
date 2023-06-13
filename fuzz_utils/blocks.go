@@ -1,7 +1,6 @@
 package fuzz_utils
 
 import (
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/interfaces"
 )
 
