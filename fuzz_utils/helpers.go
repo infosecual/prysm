@@ -1,6 +1,8 @@
 package fuzz_utils
 
 import (
+	"fmt"
+
 	"github.com/prysmaticlabs/prysm/v4/cmd/beacon-chain/flags"
 	"github.com/urfave/cli/v2"
 )
@@ -16,6 +18,7 @@ func SetFuzziness(ctx *cli.Context) {
 // this is called in-line at runtime in various req/response message processing
 // routines to determine if we should fuzz
 func ShouldFuzz() bool {
+	fmt.Println("##############################HERE##########################")
 	log.Info("CALLED SHOULDFUZZ: fuzziness:", Fuzziness)
 	return false //Fuzziness > rand.Intn(100)
 }
