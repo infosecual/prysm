@@ -18,3 +18,17 @@ cd ethereum-testnet-bootstrapper
 make build-bootstrapper
 make clean config=configs/mainnet-current-wormtongue.yaml
 make init-testnet config=configs/mainnet-current-wormtongue.yaml
+
+# print instuctions to run
+echo "#########################################################################"
+echo "# ETB is now set up to run. Run the following to start the network:"
+echo "#########################################################################"
+echo ""
+echo "cd ethereum-testnet-bootstrapper/ && docker compose up --force-recreate --remove-orphans"
+echo ""
+echo "#########################################################################"
+echo "# To attach to the health checker:"
+echo "#########################################################################"
+echo ""
+echo "docker attach status-check-0"
+echo ""
