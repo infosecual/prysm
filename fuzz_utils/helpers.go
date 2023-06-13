@@ -18,12 +18,5 @@ func SetFuzziness(ctx *cli.Context) {
 // this is called in-line at runtime in various req/response message processing
 // routines to determine if we should fuzz
 func ShouldFuzz() bool {
-	log.Info("Fuzziness", Fuzziness)
-	if Fuzziness > rand.Intn(100) {
-		log.Info("FUZZING")
-		return true
-	}
-	log.Info("NOT FUZZING")
-	return false
-	//return Fuzziness > rand.Intn(100)
+	return Fuzziness > rand.Intn(100)
 }

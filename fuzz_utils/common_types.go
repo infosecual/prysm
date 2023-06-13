@@ -11,7 +11,7 @@ var responseCodeServerError = byte(0x02)
 var responseCodeResourceUnavailable = byte(0x03)
 
 func FuzzRespCode(code *byte) {
-	log.Info("Fuzzing response code")
+	log.Info("FUZZ - FuzzRespCode before mutation: ", *code)
 	number := rand.Intn(4)
 	switch number {
 	case 0:
@@ -23,5 +23,6 @@ func FuzzRespCode(code *byte) {
 	case 3:
 		*code = responseCodeResourceUnavailable
 	}
+	log.Info("FUZZ - FuzzRespCode after mutation: ", *code)
 	return
 }

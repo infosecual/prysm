@@ -21,11 +21,11 @@ func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoc
 	// HeadSlot: *primitives.Slot
 
 	log.Info("FUZZ - FuzzStatusResponse BEFORE:")
-	log.Info("forkDigest", forkDigest)
-	log.Info("finalizedRoot", finalizedRoot)
-	log.Info("finalizedEpoch", finalizedEpoch)
-	log.Info("headRoot", headRoot)
-	log.Info("HeadSlot", HeadSlot)
+	log.Info("\tforkDigest", forkDigest)
+	log.Info("\tfinalizedRoot", finalizedRoot)
+	log.Info("\tfinalizedEpoch", finalizedEpoch)
+	log.Info("\theadRoot", headRoot)
+	log.Info("\tHeadSlot", HeadSlot)
 
 	// 20% chance to fuzz each field
 	if rand.Intn(100) < 20 {
@@ -57,9 +57,9 @@ func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoc
 	}
 
 	log.Info("FUZZ - FuzzStatusResponse AFTER:")
-	log.Info("forkDigest", forkDigest)
-	log.Info("finalizedRoot", finalizedRoot)
-	log.Info("finalizedEpoch", finalizedEpoch)
-	log.Info("headRoot", headRoot)
-	log.Info("HeadSlot", HeadSlot)
+	log.Info("\tforkDigest", forkDigest)
+	log.Info("\tfinalizedRoot", finalizedRoot)
+	log.Info("\tfinalizedEpoch", finalizedEpoch)
+	log.Info("\theadRoot", headRoot)
+	log.Info("\tHeadSlot", HeadSlot)
 }
