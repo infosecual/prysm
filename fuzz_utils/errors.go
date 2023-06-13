@@ -17,7 +17,7 @@ func FuzzWriteErrorResponseToStream(originalResponseCode byte, originalReason st
 
 func FuzzErrorResponseBytes(OriginalError []byte) []byte {
 	// resp, err := createErrorResponse(responseCode, reason, s.cfg.p2p)
-	log.Info("FUZZ - FuzzErrorResponseBytes")
+	log.Info("FUZZ - FuzzErrorResponseBytes before mutation: ", OriginalError[:1], OriginalError[1:])
 	/// Spec
 	/// The response code can have one of the following values, encoded as a single unsigned byte:
 	//	-  0: **Success** -- a normal response follows, with contents matching the expected message schema and encoding specified in the request.
@@ -34,5 +34,6 @@ func FuzzErrorResponseBytes(OriginalError []byte) []byte {
 	FuzzRespCode(&responseCode)
 	payload := OriginalError[1:]
 	MutateNBytes(&payload, 255)
+	log.Info("FUZZ - FuzzErrorResponseBytes after mutation: ", responseCode, payload)
 	return append([]byte{responseCode}, payload...)
 }
