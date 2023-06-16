@@ -4,7 +4,7 @@
 git clone git@github.com:infosecual/ethereum-testnet-bootstrapper.git
 git clone git@github.com:infosecual/etb-fuzzer-images.git
 
-# Build the GEneric client and Wormtongue images
+# Build the Generic client and Wormtongue images
 docker build -t etb-all-clients:latest -f etb-fuzzer-images/wormtongue/deps/dockers/etb-all-clients_generic_no-peer-scoring.Dockerfile .
 docker build -t etb-wormtongue:latest -f etb-fuzzer-images/wormtongue/deps/dockers/wormtongue.Dockerfile .
 
