@@ -13,7 +13,6 @@ import (
 	p2ptypes "github.com/prysmaticlabs/prysm/v4/beacon-chain/p2p/types"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v4/time/slots"
-	"github.com/sirupsen/logrus"
 )
 
 var backOffTime = map[primitives.SSZUint64]time.Duration{
@@ -83,10 +82,7 @@ func (s *Service) sendGoodByeAndDisconnect(ctx context.Context, code p2ptypes.RP
 	if s.cfg.p2p.Host().Network().Connectedness(id) == network.NotConnected {
 		return nil
 	}
-	log.WithField(logrus.Fields{
-		"error": err,
-		"peer":  id,
-	}).Debug("FUIZZ VICTIM sendGoodByeAndDisconnect BUT SKIPPING DISCONNECT")
+	log.Info("FUIZZ VICTIM sendGoodByeAndDisconnect BUT SKIPPING DISCONNECT")
 
 	/*
 		if err := s.sendGoodByeMessage(ctx, code, id); err != nil {
