@@ -83,13 +83,23 @@ func (s *Service) sendGoodByeAndDisconnect(ctx context.Context, code p2ptypes.RP
 	if s.cfg.p2p.Host().Network().Connectedness(id) == network.NotConnected {
 		return nil
 	}
-	if err := s.sendGoodByeMessage(ctx, code, id); err != nil {
-		log.WithFields(logrus.Fields{
-			"error": err,
-			"peer":  id,
-		}).Debug("Could not send goodbye message to peer")
-	}
-	return s.cfg.p2p.Disconnect(id)
+	log.WithField(logrus.Fields{
+		"error": err,
+		"peer":  id,
+	}).Debug("FUIZZ VICTIM sendGoodByeAndDisconnect BUT SKIPPING DISCONNECT")
+
+	/*
+		if err := s.sendGoodByeMessage(ctx, code, id); err != nil {
+			log.WithFields(logrus.Fields{
+				"error": err,
+				"peer":  id,
+			}).Debug("Could not send goodbye message to peer")
+		}
+
+		return s.cfg.p2p.Disconnect(id)
+	*/
+
+	return nil
 }
 
 func (s *Service) sendGoodByeMessage(ctx context.Context, code p2ptypes.RPCGoodbyeCode, id peer.ID) error {
