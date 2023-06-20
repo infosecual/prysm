@@ -8,13 +8,13 @@ if [ $# -eq 0 ]
     echo "If a specific CL is provided then Geth will be the EL client."
     echo ""
     echo "Usage:"
-    echo '    ./setup_wormtongue_etb.sh <prysm|lighthouse|teku|all>'
+    echo '    ./setup_wormtongue_etb.sh <prysm|lighthouse|teku|nimbus|lodestar|all>'
     exit 1
 fi
 
 # Check that the argument is a supported CL client or "all"
 supported=false
-if [ $1 != "prysm" -a $1 != 'dir' -a $1 != 'lighthouse' -a $1 != 'teku' -a $1 != 'all' ]
+if [ $1 != "prysm" -a $1 != 'dir' -a $1 != 'lighthouse' -a $1 != 'teku' -a $1 != 'nimbus' -a $1 != 'lodestar' -a $1 != 'all' ]
  then
     echo "Err: '$1' is not a supported option."
     echo ""
@@ -23,7 +23,7 @@ if [ $1 != "prysm" -a $1 != 'dir' -a $1 != 'lighthouse' -a $1 != 'teku' -a $1 !=
     echo "If a specific CL is provided then Geth will be the EL client."
     echo ""
     echo "Usage:"
-    echo '    ./setup_wormtongue_etb.sh <prysm|lighthouse|teku|all>'
+    echo '    ./setup_wormtongue_etb.sh <prysm|lighthouse|teku|nimbus|lodestar|all>'
     exit 1
 fi
 
