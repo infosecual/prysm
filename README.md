@@ -44,6 +44,16 @@ make init-testnet config=configs/mainnet-current-wormtongue.yaml
 ```
 
 A small script to do all of this can be found in this directory: `setup_wormtongue_etb.sh`
+This script can be used to set up all client pairings in a network as well as to isolate a single type of CL victim network.
+```
+user@shredder:~/wormtongue$ ./setup_wormtongue_etb.sh
+Please provide a vistim client to test.
+If 'all' is provided then all CL clients will be tested with various ELs.
+If a specific CL is provided then Geth will be the EL client.
+
+Usage:
+    ./setup_wormtongue_etb.sh <prysm|lighthouse|teku|all>
+```
 
 ### Running ETB
 
