@@ -6,14 +6,11 @@ import (
 	"time"
 
 	libp2pcore "github.com/libp2p/go-libp2p/core"
-	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/prysmaticlabs/prysm/v4/async"
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/p2p"
 	p2ptypes "github.com/prysmaticlabs/prysm/v4/beacon-chain/p2p/types"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/v4/time/slots"
-	"github.com/sirupsen/logrus"
 )
 
 var backOffTime = map[primitives.SSZUint64]time.Duration{
@@ -75,21 +72,26 @@ func (s *Service) sendGoodbye(ctx context.Context, id peer.ID) error {
 }
 
 func (s *Service) sendGoodByeAndDisconnect(ctx context.Context, code p2ptypes.RPCGoodbyeCode, id peer.ID) error {
-	lock := async.NewMultilock(id.String())
-	lock.Lock()
-	defer lock.Unlock()
-	// In the event we are already disconnected, exit early from the
-	// goodbye method to prevent redundant streams from being created.
-	if s.cfg.p2p.Host().Network().Connectedness(id) == network.NotConnected {
-		return nil
-	}
-	if err := s.sendGoodByeMessage(ctx, code, id); err != nil {
-		log.WithFields(logrus.Fields{
-			"error": err,
-			"peer":  id,
-		}).Debug("Could not send goodbye message to peer")
-	}
-	return s.cfg.p2p.Disconnect(id)
+	/*
+		lock := async.NewMultilock(id.String())
+		lock.Lock()
+		defer lock.Unlock()
+		// In the event we are already disconnected, exit early from the
+		// goodbye method to prevent redundant streams from being created.
+		if s.cfg.p2p.Host().Network().Connectedness(id) == network.NotConnected {
+			return nil
+		}
+		if err := s.sendGoodByeMessage(ctx, code, id); err != nil {
+			log.WithFields(logrus.Fields{
+				"error": err,
+				"peer":  id,
+			}).Debug("Could not send goodbye message to peer")
+		}
+		return s.cfg.p2p.Disconnect(id)
+	*/
+
+	// neutered this entire function bc the evil client should not disconnect its peers for any reason
+	return nil
 }
 
 func (s *Service) sendGoodByeMessage(ctx context.Context, code p2ptypes.RPCGoodbyeCode, id peer.ID) error {
