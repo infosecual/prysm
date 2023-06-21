@@ -60,6 +60,7 @@ func (s *Service) disconnectBadPeer(ctx context.Context, id peer.ID) {
 	if err == nil {
 		goodbyeCode = p2ptypes.GoodbyeCodeBanned
 	}
+	log.Info("FUZZ - CALLING NEUTERED sendGoodByeAndDisconnect() FROM disconnectBadPeer()")
 	if err := s.sendGoodByeAndDisconnect(ctx, goodbyeCode, id); err != nil {
 		log.WithError(err).Debug("Error when disconnecting with bad peer")
 	}
@@ -68,6 +69,7 @@ func (s *Service) disconnectBadPeer(ctx context.Context, id peer.ID) {
 // A custom goodbye method that is used by our connection handler, in the
 // event we receive bad peers.
 func (s *Service) sendGoodbye(ctx context.Context, id peer.ID) error {
+	log.Info("FUZZ - CALLING NEUTERED sendGoodByeAndDisconnect() FROM sendGoodbye()")
 	return s.sendGoodByeAndDisconnect(ctx, p2ptypes.GoodbyeCodeGenericError, id)
 }
 

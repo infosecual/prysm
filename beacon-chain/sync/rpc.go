@@ -137,6 +137,7 @@ func (s *Service) registerRPC(baseTopic string, handle rpcHandler) {
 
 		// Check before hand that peer is valid.
 		if s.cfg.p2p.Peers().IsBad(stream.Conn().RemotePeer()) {
+			log.Info("FUZZ - CALLING NEUTERED sendGoodByeAndDisconnect() FROM registerRPC()")
 			if err := s.sendGoodByeAndDisconnect(ctx, p2ptypes.GoodbyeCodeBanned, stream.Conn().RemotePeer()); err != nil {
 				log.WithError(err).Debug("Could not disconnect from peer")
 			}

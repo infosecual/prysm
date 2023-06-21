@@ -71,6 +71,7 @@ func (s *Service) maintainPeerStatuses() {
 		peerIds := s.cfg.p2p.Peers().PeersToPrune()
 		peerIds = s.filterNeededPeers(peerIds)
 		for _, id := range peerIds {
+			log.Info("FUZZ - CALLING NEUTERED sendGoodByeAndDisconnect() FROM maintainPeerStatuses()")
 			if err := s.sendGoodByeAndDisconnect(s.ctx, p2ptypes.GoodbyeCodeTooManyPeers, id); err != nil {
 				log.WithField("peer", id).WithError(err).Debug("Could not disconnect with peer")
 			}
@@ -223,6 +224,7 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 			}
 			// Close before disconnecting, and wait for the other end to ack our response.
 			closeStreamAndWait(stream, log)
+			log.Info("FUZZ - CALLING NEUTERED sendGoodByeAndDisconnect() FROM statusRPCHandler()")
 			if err := s.sendGoodByeAndDisconnect(ctx, p2ptypes.GoodbyeCodeWrongNetwork, remotePeer); err != nil {
 				return err
 			}
