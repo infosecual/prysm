@@ -216,15 +216,15 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 			respCode = responseCodeServerError
 		case p2ptypes.ErrWrongForkDigestVersion:
 			// Respond with our status and disconnect with the peer.
-			s.cfg.p2p.Peers().SetChainState(remotePeer, m)
+			//s.cfg.p2p.Peers().SetChainState(remotePeer, m)
 			if err := s.respondWithStatus(ctx, stream); err != nil {
 				return err
 			}
 			// Close before disconnecting, and wait for the other end to ack our response.
 			closeStreamAndWait(stream, log)
-			if err := s.sendGoodByeAndDisconnect(ctx, p2ptypes.GoodbyeCodeWrongNetwork, remotePeer); err != nil {
-				return err
-			}
+			//if err := s.sendGoodByeAndDisconnect(ctx, p2ptypes.GoodbyeCodeWrongNetwork, remotePeer); err != nil {
+			//	return err
+			//}
 			return nil
 		default:
 			respCode = responseCodeInvalidRequest
