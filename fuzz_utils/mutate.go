@@ -1,7 +1,5 @@
 package fuzz_utils
 
-import "math/rand"
-
 // /////////////////////////////////////////////////////////////////////////////
 // Mutators
 // /////////////////////////////////////////////////////////////////////////////
@@ -15,8 +13,8 @@ func MutateNBytes(b *[]byte, n int) *[]byte {
 	// mutate the copy
 	for i := 0; i < n; i++ {
 		// iterate through bytes, 50% of the time mutate the byte
-		if rand.Intn(2) == 0 {
-			(*b)[i] = byte(rand.Intn(256))
+		if RandBool() {
+			(*b)[i] = RandUint8()
 		}
 	}
 	return b

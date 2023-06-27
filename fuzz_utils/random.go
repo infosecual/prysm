@@ -17,6 +17,14 @@ var (
 	interestingU64 = []uint64{0, 1, 2147483647, 2147483648, 4294967295, 4294967296, 9223372036854775807, 9223372036854775808, 18446744073709551615}
 )
 
+func TrueWithProb(propability int) bool {
+	return rand.Intn(100) < propability
+}
+
+func RandBool() bool {
+	return rand.Intn(2) == 0
+}
+
 func RandInt8() int8 {
 	if rand.Intn(4) == 0 {
 		return interesting8[rand.Intn(len(interesting8))]

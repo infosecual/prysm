@@ -27,8 +27,7 @@ func FuzzRespCode(code *byte) {
 		futureRespCodes := rand.Intn(127-4+1) + 4
 		// Clients MAY use response codes above 128 to indicate alternative, erroneous request-specific responses.
 		clientRespCodes := rand.Intn(255-128+1) + 128
-		chooseOneOfTwo := rand.Intn(2) == 0
-		if chooseOneOfTwo {
+		if RandBool() {
 			*code = byte(futureRespCodes)
 		} else {
 			*code = byte(clientRespCodes)
