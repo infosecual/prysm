@@ -1,8 +1,6 @@
 package fuzz_utils
 
 import (
-	"math/rand"
-
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
 	"github.com/sirupsen/logrus"
 )
@@ -28,28 +26,28 @@ func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoc
 	log.Info("\tHeadSlot", HeadSlot)
 
 	// 20% chance to fuzz each field
-	if rand.Intn(100) < 20 {
+	if Prob(20) {
 		log.Info("Mutating forkDigest")
 		MutateNBytes(forkDigest, 4)
 	}
-	if rand.Intn(100) < 20 {
+	if Prob(20) {
 		// TODO: put valid root minus 1
 		log.Info("Mutating finalizedRoot")
 		MutateNBytes(finalizedRoot, 32)
 	}
-	if rand.Intn(100) < 20 {
+	if Prob(20) {
 		// TODO: put valid root minus 1
 
 		log.Info("Mutating finalizedEpoch")
 		*finalizedEpoch = primitives.Epoch(RandUint64())
 	}
-	if rand.Intn(100) < 20 {
+	if Prob(20) {
 		// TODO: put valid root minus 1
 
 		log.Info("Mutating headRoot")
 		MutateNBytes(headRoot, 32)
 	}
-	if rand.Intn(100) < 20 {
+	if Prob(20) {
 		// TODO: put valid root minus 1
 
 		log.Info("Mutating HeadSlot")

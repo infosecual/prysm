@@ -1,6 +1,6 @@
 package fuzz_utils
 
-import "math/rand"
+import "math/bits"
 
 // /////////////////////////////////////////////////////////////////////////////
 // Mutators
@@ -15,9 +15,33 @@ func MutateNBytes(b *[]byte, n int) *[]byte {
 	// mutate the copy
 	for i := 0; i < n; i++ {
 		// iterate through bytes, 50% of the time mutate the byte
-		if rand.Intn(2) == 0 {
-			(*b)[i] = byte(rand.Intn(256))
+		if RandBool() {
+			(*b)[i] = MutateByte((*b)[i])
 		}
 	}
 	return b
+}
+
+func MutateByte(b byte) byte {
+	switch x := RandUint8(); {
+	case x < 10:
+		// Bitflip
+		pos := RandUint8() % 8
+		return b ^ 1<<pos
+	case x < 20:
+		// XOR random
+		return b ^ RandUint8()
+	case x < 30:
+		// Inverse
+		return 0xff ^ b
+	case x < 40:
+		// Reverse ByteOrder
+		return bits.Reverse8(b)
+	case x < 50:
+		return bits.RotateLeft8(b, int(RandInt8()))
+	default:
+		// Random
+		return RandUint8()
+
+	}
 }
