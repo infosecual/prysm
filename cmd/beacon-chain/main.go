@@ -73,6 +73,7 @@ var appFlags = []cli.Flag{
 	flags.MaxBuilderEpochMissedSlots,
 	flags.MaxBuilderConsecutiveMissedSlots,
 	flags.EngineEndpointTimeoutSeconds,
+	flags.LocalBlockValueBoost,
 	flags.FuzzinessFlag,
 	cmd.BackupWebhookOutputDir,
 	cmd.MinimalConfigFlag,
