@@ -110,6 +110,7 @@ func (s *Service) beaconBlocksRootRPCHandler(ctx context.Context, msg interface{
 		}
 
 		if fuzz_utils.ShouldFuzz() {
+			log.Info("FUZZ - beaconBlocksRootRPCHandler, fuzzing block")
 			blk = fuzz_utils.FuzzBlock(blk)
 		}
 		if err := s.chunkBlockWriter(stream, blk); err != nil {
