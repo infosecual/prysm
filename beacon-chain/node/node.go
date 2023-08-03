@@ -154,7 +154,7 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 		return nil, err
 	}
 	// configure fuzziness for the beacon node
-	fuzz_utils.SetFuzziness(cliCtx)
+	fuzz_utils.SetFuzzSettings(cliCtx)
 
 	configureFastSSZHashingAlgorithm()
 

@@ -41,7 +41,7 @@ func FuzzBlock(blk interfaces.ReadOnlySignedBeaconBlock) interfaces.ReadOnlySign
 	log.Info("FUZZ - FuzzBlock blk.ParentRoot(): ", unsigned_blk.ParentRoot())
 	log.Info("FUZZ - FuzzBlock blk.StateRoot(): ", unsigned_blk.StateRoot())
 	log.Info("FUZZ - FuzzBlock blk.Body(): ", unsigned_blk.Body())
-	//print all fields of blk.Body()
+	// print all fields of blk.Body()
 	log.Info("FUZZ - FuzzBlock blk.Body().RandaoReveal(): ", unsigned_blk.Body().RandaoReveal())
 	log.Info("FUZZ - FuzzBlock blk.Body().Eth1Data(): ", unsigned_blk.Body().Eth1Data())
 	log.Info("FUZZ - FuzzBlock blk.Body().Graffiti(): ", unsigned_blk.Body().Graffiti())

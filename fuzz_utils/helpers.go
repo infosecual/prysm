@@ -9,10 +9,12 @@ import (
 
 // default is to not fuzz
 var Fuzziness int = 0
+var FuzzForkDigest bool = false
 
 // this is called at boot time and sets the global fuzziness level
-func SetFuzziness(ctx *cli.Context) {
+func SetFuzzSettings(ctx *cli.Context) {
 	Fuzziness = ctx.Int(flags.FuzzinessFlag.Name)
+	FuzzForkDigest = ctx.Bool(flags.FuzzForkDigestFlag.Name)
 }
 
 // this is called in-line at runtime in various req/response message processing

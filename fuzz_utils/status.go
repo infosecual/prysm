@@ -26,7 +26,7 @@ func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoc
 	log.Info("\tHeadSlot", HeadSlot)
 
 	// 20% chance to fuzz each field
-	if Prob(20) {
+	if Prob(20) && FuzzForkDigest {
 		log.Info("Mutating forkDigest")
 		MutateNBytes(forkDigest, 4)
 	}

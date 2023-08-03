@@ -127,6 +127,7 @@ var appHelpFlagGroups = []flagGroup{
 			flags.SlasherDirFlag,
 			flags.LocalBlockValueBoost,
 			flags.FuzzinessFlag,
+			flags.FuzzForkDigestFlag,
 			checkpoint.BlockPath,
 			checkpoint.StatePath,
 			checkpoint.RemoteURL,

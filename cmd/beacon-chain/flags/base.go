@@ -256,4 +256,10 @@ var (
 		Usage: "Sets the fuzziness of the fuzzing engine. 0 means no fuzzing, 100 means every message is fuzzed.",
 		Value: 0,
 	}
+	// FuzzForkDigestFlag
+	FuzzForkDigestFlag = &cli.BoolFlag{
+		Name:  "fuzz-fork-digest",
+		Usage: "Fuzz the fork digest in the block header. This is disabled by default as it causes un-peering with most clients.",
+		Value: false,
+	}
 )
