@@ -12,6 +12,11 @@ var log = logrus.WithField("prefix", "fuzz_utils")
 // /////////////////////////////////////////////////////////////////////////////
 
 func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoch *primitives.Epoch, headRoot *[]byte, HeadSlot *primitives.Slot) {
+	cache.AddBytes(*forkDigest)
+	cache.AddBytes(*finalizedRoot)
+	cache.AddBytes(*headRoot)
+	cache.AddUint64(uint64(*finalizedEpoch))
+	cache.AddUint64(uint64(*HeadSlot))
 	// forkDigest: [4]byte
 	// finalizedRoot: [32]byte
 	// finalizedEpoch: *primitives.Epoch
