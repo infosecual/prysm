@@ -33,12 +33,12 @@ func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoc
 	// 20% chance to fuzz each field
 	if Prob(20) && FuzzForkDigest {
 		log.Info("Mutating forkDigest")
-		MutateNBytes(forkDigest, 4)
+		MutateBytes(forkDigest, 4)
 	}
 	if Prob(20) {
 		// TODO: put valid root minus 1
 		log.Info("Mutating finalizedRoot")
-		MutateNBytes(finalizedRoot, 32)
+		MutateBytes(finalizedRoot, 32)
 	}
 	if Prob(20) {
 		// TODO: put valid root minus 1
@@ -50,7 +50,7 @@ func FuzzStatusResponse(forkDigest *[]byte, finalizedRoot *[]byte, finalizedEpoc
 		// TODO: put valid root minus 1
 
 		log.Info("Mutating headRoot")
-		MutateNBytes(headRoot, 32)
+		MutateBytes(headRoot, 32)
 	}
 	if Prob(20) {
 		// TODO: put valid root minus 1

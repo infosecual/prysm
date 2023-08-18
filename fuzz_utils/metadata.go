@@ -16,9 +16,9 @@ func FuzzMetadataV1(Attnets bitfield.Bitvector64, SeqNumber uint64, Syncnets bit
 	log.Info("\tSeqNumber", SeqNumber)
 	log.Info("\tSyncnets", Syncnets)
 
-	MutateNBytes((*[]byte)(&Attnets), 8)
+	MutateBytes((*[]byte)(&Attnets), 8)
 	SeqNumber = RandUint64()
-	MutateNBytes((*[]byte)(&Syncnets), 1)
+	MutateBytes((*[]byte)(&Syncnets), 1)
 
 	log.Info("FUZZ - FuzzMetadataV1 AFTER:")
 	log.Info("\tAttnets", Attnets)
@@ -35,7 +35,7 @@ func FuzzMetadataV0(Attnets bitfield.Bitvector64, SeqNumber uint64) (bitfield.Bi
 	log.Info("\tAttnets", Attnets)
 	log.Info("\tSeqNumber", SeqNumber)
 
-	MutateNBytes((*[]byte)(&Attnets), 8)
+	MutateBytes((*[]byte)(&Attnets), 8)
 	SeqNumber = RandUint64()
 
 	log.Info("FUZZ - FuzzMetadataV0 AFTER:")

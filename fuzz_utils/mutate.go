@@ -6,19 +6,29 @@ import "math/bits"
 // Mutators
 // /////////////////////////////////////////////////////////////////////////////
 
-func MutateNBytes(b *[]byte, n int) *[]byte {
+func MutateBytes(b *[]byte, n int) *[]byte {
 	// make a copy of the slice
 	//new_slice := make([]byte, len(*b))
 	//new_ptr := &new_slice
 	//copy(*new_ptr, *b)
 
-	// mutate the copy
-	for i := 0; i < n; i++ {
-		// iterate through bytes, 50% of the time mutate the byte
-		if RandBool() {
-			(*b)[i] = MutateByte((*b)[i])
+	switch x := RandUint8(); {
+	case x < 10:
+		// mutate the copy
+		for i := 0; i < n; i++ {
+			// iterate through bytes, 50% of the time mutate the byte
+			if RandBool() {
+				(*b)[i] = MutateByte((*b)[i])
+			}
 		}
+	case x < 100:
+		// pick a random value from cache
+		bytes := cache.GetBytes(n, int(RandInt64()))
+		*b = bytes
+	default:
+		// do nothing
 	}
+
 	return b
 }
 
