@@ -9,6 +9,19 @@ import (
 // /////////////////////////////////////////////////////////////////////////////
 
 func FuzzBlock(blk interfaces.ReadOnlySignedBeaconBlock) interfaces.ReadOnlySignedBeaconBlock {
+	cache.AddUint64(uint64(blk.Block().Slot()))
+	cache.AddUint64(uint64(blk.Block().ProposerIndex()))
+	root := blk.Block().ParentRoot()
+	cache.AddBytes(root[:])
+	state_root := blk.Block().StateRoot()
+	cache.AddBytes(state_root[:])
+	randao := blk.Block().Body().RandaoReveal()
+	cache.AddBytes(randao[:])
+	cache.AddBytes(blk.Block().Body().Eth1Data().BlockHash)
+	cache.AddBytes(blk.Block().Body().Eth1Data().DepositRoot)
+	cache.AddBytes(blk.Block().Body().Eth1Data().GetBlockHash())
+	graffiti := blk.Block().Body().Graffiti()
+	cache.AddBytes(graffiti[:])
 	// blk: interfaces.ReadOnlySignedBeaconBlock
 	// from spec
 	//class BeaconBlock(Container):

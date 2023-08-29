@@ -33,7 +33,7 @@ func FuzzErrorResponseBytes(OriginalError []byte) []byte {
 	var responseCode byte
 	FuzzRespCode(&responseCode)
 	payload := OriginalError[1:]
-	MutateNBytes(&payload, 255)
+	MutateBytes(&payload, 255)
 	log.Info("FUZZ - FuzzErrorResponseBytes after mutation: ", responseCode, payload)
 	return append([]byte{responseCode}, payload...)
 }
