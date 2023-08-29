@@ -18,6 +18,11 @@ var (
 		Name:  "sepolia",
 		Usage: "Run Prysm configured for the Sepolia beacon chain test network",
 	}
+	// HoleskyTestnet flag for the multiclient Ethereum consensus testnet.
+	HoleskyTestnet = &cli.BoolFlag{
+		Name:  "holesky",
+		Usage: "Run Prysm configured for the Holesky beacon chain test network",
+	}
 	// Mainnet flag for easier tooling, no-op
 	Mainnet = &cli.BoolFlag{
 		Value: true,
@@ -151,13 +156,13 @@ var (
 
 	// DisableRegistrationCache a flag for disabling the validator registration cache and use db instead.
 	DisableRegistrationCache = &cli.BoolFlag{
-		Name:  "diable-registration-cache",
+		Name:  "disable-registration-cache",
 		Usage: "A temporary flag for disabling the validator registration cache instead of using the db. note: registrations do not clear on restart while using the db",
 	}
 
-	aggregateParallel = &cli.BoolFlag{
-		Name:  "aggregate-parallel",
-		Usage: "Enables parallel aggregation of attestations",
+	disableAggregateParallel = &cli.BoolFlag{
+		Name:  "disable-aggregate-parallel",
+		Usage: "Disables parallel aggregation of attestations",
 	}
 )
 
@@ -171,6 +176,7 @@ var devModeFlags = []cli.Flag{
 var ValidatorFlags = append(deprecatedFlags, []cli.Flag{
 	writeWalletPasswordOnWebOnboarding,
 	enableExternalSlasherProtectionFlag,
+	HoleskyTestnet,
 	PraterTestnet,
 	SepoliaTestnet,
 	Mainnet,
@@ -191,6 +197,7 @@ var BeaconChainFlags = append(deprecatedBeaconFlags, append(deprecatedFlags, []c
 	devModeFlag,
 	writeSSZStateTransitionsFlag,
 	disableGRPCConnectionLogging,
+	HoleskyTestnet,
 	PraterTestnet,
 	SepoliaTestnet,
 	Mainnet,
@@ -212,7 +219,7 @@ var BeaconChainFlags = append(deprecatedBeaconFlags, append(deprecatedFlags, []c
 	aggregateThirdInterval,
 	disableResourceManager,
 	DisableRegistrationCache,
-	aggregateParallel,
+	disableAggregateParallel,
 }...)...)
 
 // E2EBeaconChainFlags contains a list of the beacon chain feature flags to be tested in E2E.
@@ -225,4 +232,5 @@ var NetworkFlags = []cli.Flag{
 	Mainnet,
 	PraterTestnet,
 	SepoliaTestnet,
+	HoleskyTestnet,
 }

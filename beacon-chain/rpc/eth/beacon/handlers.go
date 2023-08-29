@@ -7,18 +7,26 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/core/transition"
-	"github.com/prysmaticlabs/prysm/v4/beacon-chain/rpc/eth/helpers"
+	"github.com/prysmaticlabs/prysm/v4/beacon-chain/rpc/eth/shared"
+	fieldparams "github.com/prysmaticlabs/prysm/v4/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/blocks"
 	"github.com/prysmaticlabs/prysm/v4/consensus-types/interfaces"
+	"github.com/prysmaticlabs/prysm/v4/consensus-types/primitives"
+	"github.com/prysmaticlabs/prysm/v4/encoding/bytesutil"
 	http2 "github.com/prysmaticlabs/prysm/v4/network/http"
 	ethpbv1 "github.com/prysmaticlabs/prysm/v4/proto/eth/v1"
 	ethpbv2 "github.com/prysmaticlabs/prysm/v4/proto/eth/v2"
 	"github.com/prysmaticlabs/prysm/v4/proto/migration"
 	eth "github.com/prysmaticlabs/prysm/v4/proto/prysm/v1alpha1"
+	"go.opencensus.io/trace"
 )
 
 const (
@@ -38,7 +46,7 @@ const (
 // a `SignedBeaconBlock`. The broadcast behaviour may be adjusted via the `broadcast_validation`
 // query parameter.
 func (bs *Server) PublishBlindedBlockV2(w http.ResponseWriter, r *http.Request) {
-	if ok := bs.checkSync(r.Context(), w); !ok {
+	if shared.IsSyncing(r.Context(), w, bs.SyncChecker, bs.HeadFetcher, bs.TimeFetcher, bs.OptimisticModeFetcher) {
 		return
 	}
 	isSSZ, err := http2.SszRequested(r)
@@ -302,7 +310,7 @@ func publishBlindedBlockV2(bs *Server, w http.ResponseWriter, r *http.Request) {
 // successfully broadcast but failed integration. The broadcast behaviour may be adjusted via the
 // `broadcast_validation` query parameter.
 func (bs *Server) PublishBlockV2(w http.ResponseWriter, r *http.Request) {
-	if ok := bs.checkSync(r.Context(), w); !ok {
+	if shared.IsSyncing(r.Context(), w, bs.SyncChecker, bs.HeadFetcher, bs.TimeFetcher, bs.OptimisticModeFetcher) {
 		return
 	}
 	isSSZ, err := http2.SszRequested(r)
@@ -632,28 +640,119 @@ func (bs *Server) validateEquivocation(blk interfaces.ReadOnlyBeaconBlock) error
 	return nil
 }
 
-func (bs *Server) checkSync(ctx context.Context, w http.ResponseWriter) bool {
-	isSyncing, syncDetails, err := helpers.ValidateSyncHTTP(ctx, bs.SyncChecker, bs.HeadFetcher, bs.TimeFetcher, bs.OptimisticModeFetcher)
+// GetBlockRoot retrieves the root of a block.
+func (bs *Server) GetBlockRoot(w http.ResponseWriter, r *http.Request) {
+	ctx, span := trace.StartSpan(r.Context(), "beacon.GetBlockRoot")
+	defer span.End()
+
+	var err error
+	var root []byte
+	blockID := mux.Vars(r)["block_id"]
+	if blockID == "" {
+		http2.HandleError(w, "block_id is required in URL params", http.StatusBadRequest)
+		return
+	}
+	switch blockID {
+	case "head":
+		root, err = bs.ChainInfoFetcher.HeadRoot(ctx)
+		if err != nil {
+			http2.HandleError(w, "Could not retrieve head root: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if root == nil {
+			http2.HandleError(w, "No head root was found", http.StatusNotFound)
+			return
+		}
+	case "finalized":
+		finalized := bs.ChainInfoFetcher.FinalizedCheckpt()
+		root = finalized.Root
+	case "genesis":
+		blk, err := bs.BeaconDB.GenesisBlock(ctx)
+		if err != nil {
+			http2.HandleError(w, "Could not retrieve genesis block: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err := blocks.BeaconBlockIsNil(blk); err != nil {
+			http2.HandleError(w, "Could not find genesis block: "+err.Error(), http.StatusNotFound)
+			return
+		}
+		blkRoot, err := blk.Block().HashTreeRoot()
+		if err != nil {
+			http2.HandleError(w, "Could not hash genesis block: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		root = blkRoot[:]
+	default:
+		isHex := strings.HasPrefix(blockID, "0x")
+		if isHex {
+			blockIDBytes, err := hexutil.Decode(blockID)
+			if err != nil {
+				http2.HandleError(w, "Could not decode block ID into bytes: "+err.Error(), http.StatusBadRequest)
+				return
+			}
+			if len(blockIDBytes) != fieldparams.RootLength {
+				http2.HandleError(w, fmt.Sprintf("Block ID has length %d instead of %d", len(blockIDBytes), fieldparams.RootLength), http.StatusBadRequest)
+				return
+			}
+			blockID32 := bytesutil.ToBytes32(blockIDBytes)
+			blk, err := bs.BeaconDB.Block(ctx, blockID32)
+			if err != nil {
+				http2.HandleError(w, fmt.Sprintf("Could not retrieve block for block root %#x: %v", blockID, err), http.StatusInternalServerError)
+				return
+			}
+			if err := blocks.BeaconBlockIsNil(blk); err != nil {
+				http2.HandleError(w, "Could not find block: "+err.Error(), http.StatusNotFound)
+				return
+			}
+			root = blockIDBytes
+		} else {
+			slot, err := strconv.ParseUint(blockID, 10, 64)
+			if err != nil {
+				http2.HandleError(w, "Could not parse block ID: "+err.Error(), http.StatusBadRequest)
+				return
+			}
+			hasRoots, roots, err := bs.BeaconDB.BlockRootsBySlot(ctx, primitives.Slot(slot))
+			if err != nil {
+				http2.HandleError(w, fmt.Sprintf("Could not retrieve blocks for slot %d: %v", slot, err), http.StatusInternalServerError)
+				return
+			}
+
+			if !hasRoots {
+				http2.HandleError(w, "Could not find any blocks with given slot", http.StatusNotFound)
+				return
+			}
+			root = roots[0][:]
+			if len(roots) == 1 {
+				break
+			}
+			for _, blockRoot := range roots {
+				canonical, err := bs.ChainInfoFetcher.IsCanonical(ctx, blockRoot)
+				if err != nil {
+					http2.HandleError(w, "Could not determine if block root is canonical: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+				if canonical {
+					root = blockRoot[:]
+					break
+				}
+			}
+		}
+	}
+
+	b32Root := bytesutil.ToBytes32(root)
+	isOptimistic, err := bs.OptimisticModeFetcher.IsOptimisticForRoot(ctx, b32Root)
 	if err != nil {
-		errJson := &http2.DefaultErrorJson{
-			Message: "Could not check if node is syncing: " + err.Error(),
-			Code:    http.StatusInternalServerError,
-		}
-		http2.WriteError(w, errJson)
-		return false
+		http2.HandleError(w, "Could not check if block is optimistic: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
-	if isSyncing {
-		msg := "Beacon node is currently syncing and not serving request on that endpoint"
-		details, err := json.Marshal(syncDetails)
-		if err == nil {
-			msg += " Details: " + string(details)
-		}
-		errJson := &http2.DefaultErrorJson{
-			Message: msg,
-			Code:    http.StatusServiceUnavailable,
-		}
-		http2.WriteError(w, errJson)
-		return false
+	response := &BlockRootResponse{
+		Data: &struct {
+			Root string `json:"root"`
+		}{
+			Root: hexutil.Encode(root),
+		},
+		ExecutionOptimistic: isOptimistic,
+		Finalized:           bs.FinalizationFetcher.IsFinalized(ctx, b32Root),
 	}
-	return true
+	http2.WriteJson(w, response)
 }

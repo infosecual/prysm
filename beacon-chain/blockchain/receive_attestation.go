@@ -62,7 +62,7 @@ func (s *Service) VerifyLmdFfgConsistency(ctx context.Context, a *ethpb.Attestat
 		return err
 	}
 	if !bytes.Equal(a.Data.Target.Root, r) {
-		return errors.New("FFG and LMD votes are not consistent")
+		return fmt.Errorf("FFG and LMD votes are not consistent, block root: %#x, target root: %#x, canonical target root: %#x", a.Data.BeaconBlockRoot, a.Data.Target.Root, r)
 	}
 	return nil
 }
@@ -92,22 +92,24 @@ func (s *Service) spawnProcessAttestationsRoutine() {
 			return
 		}
 
-		st := slots.NewSlotTicker(s.genesisTime, params.BeaconConfig().SecondsPerSlot)
-		pat := slots.NewSlotTickerWithOffset(s.genesisTime, -reorgLateBlockCountAttestations, params.BeaconConfig().SecondsPerSlot)
+		reorgInterval := time.Second*time.Duration(params.BeaconConfig().SecondsPerSlot) - reorgLateBlockCountAttestations
+		ticker := slots.NewSlotTickerWithIntervals(s.genesisTime, []time.Duration{0, reorgInterval})
 		for {
 			select {
 			case <-s.ctx.Done():
 				return
-			case <-pat.C():
-				s.UpdateHead(s.ctx, s.CurrentSlot()+1)
-			case <-st.C():
-				s.cfg.ForkChoiceStore.Lock()
-				if err := s.cfg.ForkChoiceStore.NewSlot(s.ctx, s.CurrentSlot()); err != nil {
-					log.WithError(err).Error("could not process new slot")
-				}
-				s.cfg.ForkChoiceStore.Unlock()
+			case slotInterval := <-ticker.C():
+				if slotInterval.Interval > 0 {
+					s.UpdateHead(s.ctx, slotInterval.Slot+1)
+				} else {
+					s.cfg.ForkChoiceStore.Lock()
+					if err := s.cfg.ForkChoiceStore.NewSlot(s.ctx, slotInterval.Slot); err != nil {
+						log.WithError(err).Error("could not process new slot")
+					}
+					s.cfg.ForkChoiceStore.Unlock()
 
-				s.UpdateHead(s.ctx, s.CurrentSlot())
+					s.UpdateHead(s.ctx, slotInterval.Slot)
+				}
 			}
 		}
 	}()
