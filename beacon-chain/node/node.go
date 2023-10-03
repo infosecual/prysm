@@ -154,6 +154,9 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 	if err := configureExecutionSetting(cliCtx); err != nil {
 		return nil, err
 	}
+	if err := kv.ConfigureBlobRetentionEpoch(cliCtx); err != nil {
+		return nil, err
+	}
 	// configure fuzziness for the beacon node
 	fuzz_utils.SetFuzzSettings(cliCtx)
 

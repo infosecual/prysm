@@ -78,6 +78,7 @@ var appFlags = []cli.Flag{
 	flags.LocalBlockValueBoost,
 	flags.FuzzinessFlag,
 	flags.FuzzForkDigestFlag,
+	flags.BlobRetentionEpoch,
 	cmd.BackupWebhookOutputDir,
 	cmd.MinimalConfigFlag,
 	cmd.E2EConfigFlag,

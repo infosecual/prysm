@@ -130,6 +130,7 @@ var appHelpFlagGroups = []flagGroup{
 			flags.LocalBlockValueBoost,
 			flags.FuzzinessFlag,
 			flags.FuzzForkDigestFlag,
+			flags.BlobRetentionEpoch,
 			checkpoint.BlockPath,
 			checkpoint.StatePath,
 			checkpoint.RemoteURL,
